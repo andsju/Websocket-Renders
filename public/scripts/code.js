@@ -16,10 +16,11 @@ import Player from "./Player.js";
 ------------------------------- */
 const IP = "localhost";
 const websocket = new WebSocket(`ws://${IP}:8888`);
-const tile = 32;
 const fps = 60;
+const tile = 10;
 const players = [];
 let player;
+let start;
 
 
 
@@ -42,8 +43,9 @@ form.addEventListener("submit", (e) => {
     fetch(`http://${IP}:8888/api/id`)
         .then(res => res.json())
         .then((obj) => {
-            player = new Player(obj.id, username, obj.color, tile, tile, tile);
+            player = new Player(obj.id, username, obj.color, tile, randomBetween(50, canvas.width - 50), randomBetween(50, canvas.height - 50), randomDirection(randomBetween(1, 3)), randomDirection(randomBetween(1, 3)));
             players.push(player);
+            console.log(player);
             websocket.send(JSON.stringify({ type: "newplayer", player: player }));
         });
 });
@@ -73,7 +75,7 @@ websocket.addEventListener("message", (e) => {
         case "newplayer":
 
             // add websocket player in 'browser land'
-            const socketPlayer = new Player(obj.player.id, obj.player.username, obj.player.color, tile, tile, tile);
+            const socketPlayer = new Player(obj.player.id, obj.player.username, obj.player.color, obj.player.tile, obj.player.x, obj.player.y, obj.player.vx, obj.player.vy);
             players.push(socketPlayer);
 
             break;
@@ -97,6 +99,8 @@ websocket.addEventListener("message", (e) => {
                 if (player.id === obj.player.id) {
                     player.x = obj.player.x;
                     player.y = obj.player.y;
+                    player.vx = obj.player.vx;
+                    player.vy = obj.player.vy;
                 }
             });
             break;
@@ -129,16 +133,16 @@ window.addEventListener("keydown", (e) => {
     // arrow keys
     switch (e.key) {
         case "ArrowRight":
-            player.x += player.x + tile < canvas.width ? tile : 0;
+            player.vx += player.vx < player.maxSpeed ? 2 : -0.3;
             break;
         case "ArrowDown":
-            player.y += player.y + tile < canvas.height ? tile : 0;
+            player.vy += player.vy < player.maxSpeed ? 2 : -0.3;
             break;
         case "ArrowLeft":
-            player.x -= player.x > 0 ? tile : 0;
+            player.vx -= player.vx < player.maxSpeed ? 2 : 0.3;
             break;
         case "ArrowUp":
-            player.y -= player.y > 0 ? tile : 0;
+            player.vy -= player.vy < player.maxSpeed ? 2 : 0.3;
             break;
         default:
             break;
@@ -158,7 +162,7 @@ canvas.addEventListener("touchstart", (e) => {
 
     if (player) {
         player.x = x * tile - tile;
-        player.y = y * tile - tile;    
+        player.y = y * tile - tile;
     }
 
     websocket.send(JSON.stringify({ type: "move", player: player }));
@@ -169,7 +173,15 @@ canvas.addEventListener("touchstart", (e) => {
 /* functions
 ------------------------------- */
 
-function gameLoop() {
+function gameLoop(timestamp) {
+
+    if (start === undefined) {
+        start = timestamp;
+    }
+    const elapsed = timestamp - start;
+
+    // console.log(elapsed);
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setTimeout(() => {
         requestAnimationFrame(gameLoop)
@@ -183,5 +195,14 @@ function gameLoop() {
 function renderPlayers() {
     players.forEach(player => {
         player.draw(ctx);
+        player.move(canvas);
     })
+}
+
+function randomBetween(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function randomDirection(v) {
+    return Math.random() > 0.5 ? v : -v;
 }
