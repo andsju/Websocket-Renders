@@ -87,7 +87,7 @@ wss.on("connection", (ws) => {
         if (Array.isArray(playersOnline)) {
             for (let i = playersOnline.length - 1; i >= 0; i--) {
                 if (playersOnline[i].ws === ws) {
-                    playerOffline = playersOnline.splice(i , 1);
+                    playerOffline = playersOnline.splice(i, 1);
                 }
             }
         }
@@ -111,21 +111,12 @@ wss.on("connection", (ws) => {
                 // add player in 'server land'
                 playersOnline.push({ ws: ws, player: obj.player });
                 broadcastExclude(wss, ws, { type: "newplayer", player: obj.player });
+
                 break;
 
-            case "move":
+            case "draw":
 
-                // update player position in 'server land'
-                for (let i = 0; i < playersOnline.length; i++) {
-                    if (playersOnline[i].player.hasOwnProperty("id")) {
-                        if (playersOnline[i].player.id === obj.player.id) {
-                            playersOnline[i].player.x = obj.player.x;
-                            playersOnline[i].player.y = obj.player.y;                        
-                        }
-                    }
-                }
-
-                broadcastExclude(wss, ws, { type: "move", player: obj.player });
+                broadcastExclude(wss, ws, obj);
                 break;
 
             default:
