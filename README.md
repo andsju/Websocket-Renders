@@ -29,4 +29,4 @@ Motion: websocket drawings slighty delayed - buffered
 
 
 ### Websocket tip 
-Instantiate players (shared game objects) using classes. Make websocket send user interaction events. Let server know about things happening in 'server land', listen to events and render in 'browser land' - kepp listening on events.     
+Instantiate players (shared game objects) using classes. Make websocket send user interaction events. Let server know about things happening in 'server land', listen to events and render in 'browser land' - keep listening on events.     
