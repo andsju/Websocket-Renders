@@ -22,5 +22,11 @@ Canvas application using websocket: moving step by step
 
 Motion: *Fish in water...*
 
+### Branch drawings
+Canvas application using websocket: collaborative drawing
+
+Motion: websocket drawings slighty delayed - buffered  
+
+
 ### Websocket tip 
 Instantiate players (shared game objects) using classes. Make websocket send user interaction events. Let server know about things happening in 'server land', listen to events and render in 'browser land' - kepp listening on events.     
